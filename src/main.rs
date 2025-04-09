@@ -39,7 +39,7 @@ fn main() -> std::process::ExitCode {
 	}
 	
 	trace!("Pinger::new");
-	let mut pinger = match Pinger::new(args.ip) {
+	let mut pinger = match Pinger::new(&args.ip) {
 		Ok(p) => p,
 		Err(e) => {
 			error!(desc = e.to_string());
@@ -68,7 +68,7 @@ fn main() -> std::process::ExitCode {
 			}
 		};
 
-		println!("{}", format!("Packet #{} | {} -> {} | {:.2} ms",
+		println!("{}", format!("[{}] | {} -> {} | {:.2} ms",
 			reply.sequence,
 			reply.from_addr,
 			reply.dest_addr,
@@ -77,7 +77,7 @@ fn main() -> std::process::ExitCode {
 		return true;
 	};
 
-	println!("Pinging {}{}...", pinger.get_dest(), if let Some(c) = args.count { format!(" {} times", c) } else { "".to_string() });
+	println!("Pinging {} ({}){}", args.ip, pinger.get_dest(), if let Some(c) = args.count { format!(" {} times", c) } else { "".to_string() });
 	if let Some(count) = args.count {
 		for _ in 0..count {
 			if !ping(&mut pinger, args.interval) { break; }
