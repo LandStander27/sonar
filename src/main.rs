@@ -56,6 +56,10 @@ fn main() -> std::process::ExitCode {
 	let ping = |pinger: &mut Pinger, wait_time: f32| -> bool {
 		std::thread::sleep(std::time::Duration::from_secs_f32(wait_time));
 		
+		if rx.try_recv().is_ok() {
+			return false;
+		}
+		
 		trace!("Pinger::ping");
 		let reply = match pinger.ping(&rx) {
 			Ok(r) => r,
