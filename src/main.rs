@@ -1,9 +1,14 @@
-use colored::Colorize;
 use logger::prelude::*;
 use icmp::prelude::*;
 
-use std::sync::mpsc::{channel, Sender, Receiver};
+use std::sync::mpsc::{
+	channel,
+	Receiver,
+	Sender
+};
 use clap::Parser;
+use tracing_subscriber::prelude::*;
+use colored::Colorize;
 
 #[derive(Parser, Debug)]
 #[command(name = "sonar", version = version::version)]
@@ -20,12 +25,22 @@ struct Args {
 	
 	#[arg(short, long, help = "seconds to wait between sending packets", default_value_t = 1.0)]
 	interval: f32,
+	
+	#[arg(short = 'x', long, help = "enable querying for extra information (uses IP2Location)", default_value_t = false)]
+	extra: bool,
 }
+
+mod info_query;
 
 fn main() -> std::process::ExitCode {
 	let args = Args::parse();
 	
-	logger::register(Level::from(args.verbose));
+	let layer = tracing_indicatif::IndicatifLayer::new();
+	logger::register(Level::from(args.verbose))
+		.with_writer(layer.get_stdout_writer())
+		.finish()
+		.with(layer)
+		.init();
 	
 	let (tx, rx): (Sender<()>, Receiver<()>) = channel();
 	if let Err(e) = ctrlc::set_handler(move || {
@@ -36,6 +51,10 @@ fn main() -> std::process::ExitCode {
 		}
 	}) {
 		error!(desc = e.to_string(), "could not set ctrlc handler");
+	}
+	
+	if args.extra && info_query::whois(&args.ip, &rx).is_err() {
+		error!("querying for extra info failed");
 	}
 	
 	trace!("Pinger::new");

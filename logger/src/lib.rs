@@ -38,9 +38,9 @@ pub fn set_log_level(level: Level) {
 	tracing::subscriber::set_global_default(subscriber).unwrap();
 }
 
-pub fn register(level: Level) {
-	let subscriber = tracing_subscriber::fmt().with_max_level(level.to_tracing()).finish();
-	tracing::subscriber::set_global_default(subscriber).unwrap();
+pub fn register(level: Level) -> tracing_subscriber::fmt::SubscriberBuilder {
+	let subscriber = tracing_subscriber::fmt().with_max_level(level.to_tracing());
+	// tracing::subscriber::set_global_default(subscriber).unwrap();
 	std::panic::set_hook(Box::new(|panic| {
 		let payload = panic.payload();
 		let message: String = if let Some(&s) = payload.downcast_ref::<&str>() {
@@ -63,4 +63,6 @@ pub fn register(level: Level) {
 			tracing::error!(message = %panic);
 		}
 	}));
+	
+	return subscriber;
 }

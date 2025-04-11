@@ -38,4 +38,5 @@ cargo b --release
 | `-V, --version`             | Outputs version.                             |
 | `-c, --count`               | amount to attempt pinging                    |
 | `-i, --interval`            | seconds to wait between sending packets      |
+| `-x, --extra`               | enable querying for extra information        |
 | `IP`                        | ip address to ping                           |
